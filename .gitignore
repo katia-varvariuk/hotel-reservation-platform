@@ -1,0 +1,22 @@
+# .NET
+bin/
+obj/
+*.user
+.vs/
+*.suo
+*.userosscache
+*.sln.docstates
+logs/
+TestResults/
+coverage/
+nul
+
+# Frontend
+hotel-frontend/node_modules/
+hotel-frontend/.next/
+hotel-frontend/out/
+hotel-frontend/.env*.local
+
+# Misc
+*.DS_Store
+Thumbs.db
