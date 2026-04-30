@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+@theme {
+  /* Luxury palette */
+  --color-ivory:        #FFFFF0;
+  --color-warm-white:   #F8F6F2;
+  --color-cream:        #F0EBE3;
+  --color-beige:        #DCC9A9;
+  --color-beige-light:  #EDE3D5;
+  --color-brown:        #4A3428;
+  --color-brown-mid:    #6B4C3B;
+  --color-brown-light:  #9B7A67;
+  --color-graphite:     #2B2B2B;
+  --color-gold:         #C8A96B;
+  --color-gold-light:   #D4B97A;
+  --color-gold-dark:    #A8893B;
+  --color-sage:         #7A8B7A;
+
+  /* Fonts */
+  --font-serif: var(--font-playfair, 'Playfair Display', Georgia, serif);
+  --font-sans:  var(--font-inter, Inter, system-ui, sans-serif);
+}
+
+:root {
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+input, select, textarea {
+  background-color: #ffffff;
+  color: #4A3428;
+}
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: #F0EBE3; }
+::-webkit-scrollbar-thumb { background: #DCC9A9; border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: #C8A96B; }
