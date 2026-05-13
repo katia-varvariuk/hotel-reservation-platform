@@ -4,10 +4,75 @@ import { useState, useEffect } from 'react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import api from '@/lib/api'
 import { Amenity, AvailableRoom, ReviewDto } from '@/lib/types'
+import { ROOM_TYPE_UA } from '@/lib/constants'
 import { useAuth } from '@/context/AuthContext'
+import { useToast } from '@/context/ToastContext'
 import BookingModal from '@/components/BookingModal'
 
-const ROOM_TYPE_UA: Record<string, string> = { Standard: 'Стандарт', Deluxe: 'Делюкс', Suite: 'Сюїт' }
+
+const ROOM_GALLERY: Record<number, Array<{ label: string; url: string }>> = {
+  1: [
+    { label: 'Ванна кімната', url: 'https://plus.unsplash.com/premium_photo-1674035037216-44af020955ad?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },
+  ],
+  2: [
+    { label: 'Ванна кімната', url: 'https://images.unsplash.com/photo-1587527901949-ab0341697c1e?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },
+  ],
+  6: [
+    { label: 'Ванна кімната', url: 'https://images.unsplash.com/photo-1629079447777-1e605162dc8d?q=80&w=1169&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },
+    { label: 'Зона відпочинку', url: 'https://images.unsplash.com/photo-1631049422186-4b0569fed517?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },
+  ],
+  7: [
+    { label: 'Ванна кімната', url: 'https://images.unsplash.com/photo-1695002817411-203c7f19dfa3?q=80&w=1332&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },
+    { label: 'Зона відпочинку', url: 'https://images.unsplash.com/photo-1631049035486-58f342e9c6a9?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },
+  ],
+  3: [
+    { label: 'Ванна кімната', url: 'https://images.unsplash.com/photo-1651951646668-46562cfb4518?q=80&w=1182&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },
+  ],
+  4: [
+    { label: 'Ванна кімната', url: 'https://images.unsplash.com/photo-1564540579594-0930edb6de43?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },
+  ],
+  8: [
+    { label: 'Ванна кімната', url: 'https://plus.unsplash.com/premium_photo-1661884424253-08db7c7758ce?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },
+  ],
+  9: [
+    { label: 'Вітальня', url: 'https://images.unsplash.com/photo-1646974400439-321c4a9240b9?w=800&q=80&auto=format&fit=crop' },
+    { label: 'Балкон / тераса', url: 'https://images.unsplash.com/photo-1591944438730-23dbc9076a9a?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },
+    { label: 'Ванна кімната', url: 'https://images.unsplash.com/photo-1572742482459-e04d6cfdd6f3?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },
+  ],
+  10: [
+    { label: 'Робоча зона', url: 'https://images.unsplash.com/photo-1774280918099-599d2647621c?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },
+    { label: 'Ванна кімната', url: 'https://images.unsplash.com/photo-1634320611782-e7589d174453?q=80&w=1171&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },
+  ],
+  5: [
+    { label: 'Ванна кімната', url: 'https://plus.unsplash.com/premium_photo-1661963630748-3de7ab820570?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },
+    { label: 'Вітальня', url: 'https://images.unsplash.com/photo-1691936932068-e82aeea4f0ff?q=80&w=1193&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },
+    { label: 'Тераса', url: 'https://images.unsplash.com/photo-1657639753220-8d59b05958d1?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },
+  ],
+  11: [
+    { label: 'Ванна кімната', url: 'https://images.unsplash.com/photo-1646974400439-8472d58bb19e?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },
+    { label: 'Вітальня', url: 'https://images.unsplash.com/photo-1713832139688-79676097edde?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },
+  ],
+  12: [
+    { label: 'Спальня 2', url: 'https://plus.unsplash.com/premium_photo-1661877303180-19a028c21048?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },
+    { label: 'Ванна кімната', url: 'https://images.unsplash.com/photo-1765745518673-b562b7304a53?q=80&w=880&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },
+    { label: 'Ванна кімната 2', url: 'https://images.unsplash.com/photo-1705591882907-35324c0b592d?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },
+    { label: 'Кухня', url: 'https://images.unsplash.com/photo-1631049421483-bbcab9b66473?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },
+    { label: 'Вітальня', url: 'https://images.unsplash.com/photo-1772143535090-ede0b1d24a6c?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },
+  ],
+  13: [
+    { label: 'Ванна кімната', url: 'https://images.unsplash.com/photo-1641870538417-c83e621d1425?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mzh8fG1vZGVybiUyMGhvdGVsJTIwYmF0aHJvb218ZW58MHx8MHx8fDA%3D' },
+    { label: 'Тераса', url: 'https://images.unsplash.com/photo-1643913586401-c7c0b0f1b352?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },
+    { label: 'Вітальня', url: 'https://images.unsplash.com/photo-1756199638047-6d6930280e37?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },
+  ],
+  14: [
+    { label: 'Ванна кімната', url: 'https://plus.unsplash.com/premium_photo-1675018083155-6742ba47d570?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },
+    { label: 'Вітальня', url: 'https://images.unsplash.com/photo-1600493505873-cddd69453072?q=80&w=1332&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },
+  ],
+  15: [
+    { label: 'Ванна кімната', url: 'https://images.unsplash.com/photo-1744025098626-66c0b9cb1ba8?q=80&w=880&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },
+    { label: 'Вітальня', url: 'https://images.unsplash.com/photo-1600210491892-03d54c0aaf87' },
+  ],
+}
 
 const TYPE_GALLERY: Record<string, Array<{ label: string; url: string }>> = {
   Standard: [
@@ -69,8 +134,20 @@ export default function RoomDetailPage() {
   const [comment, setComment] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [reviewError, setReviewError] = useState('')
+  const [lightbox, setLightbox] = useState<{ slides: Array<{ url: string; label: string }>; index: number } | null>(null)
 
   const avgRating = reviews.length ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length : 0
+
+  useEffect(() => {
+    if (!lightbox) return
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { setLightbox(null); return }
+      if (e.key === 'ArrowRight') setLightbox(lb => lb && { ...lb, index: (lb.index + 1) % lb.slides.length })
+      if (e.key === 'ArrowLeft') setLightbox(lb => lb && { ...lb, index: (lb.index - 1 + lb.slides.length) % lb.slides.length })
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [lightbox])
 
   useEffect(() => {
     const roomId = parseInt(id)
@@ -166,10 +243,10 @@ export default function RoomDetailPage() {
       <div className="bg-ivory border border-beige overflow-hidden">
         {/* Photo slider */}
         {(() => {
-          const gallery = TYPE_GALLERY[room.roomType] ?? TYPE_GALLERY.Standard
+          const gallery = ROOM_GALLERY[room.roomId] ?? TYPE_GALLERY[room.roomType] ?? TYPE_GALLERY.Standard
           const mainPhoto = room.photoUrl || 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=1200&q=80&auto=format&fit=crop'
           const slides = [
-            { label: `Кімната ${room.roomNumber}`, url: mainPhoto },
+            { label: 'Спальня', url: mainPhoto },
             ...gallery,
           ]
           const total = slides.length
@@ -182,7 +259,8 @@ export default function RoomDetailPage() {
                 key={slideIndex}
                 src={cur.url}
                 alt={cur.label}
-                className="w-full h-full object-cover transition-opacity duration-300"
+                onClick={() => setLightbox({ slides, index: slideIndex })}
+                className="w-full h-full object-cover transition-opacity duration-300 cursor-zoom-in"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
 
@@ -385,6 +463,59 @@ export default function RoomDetailPage() {
           onSuccess={() => { setShowBooking(false); router.push('/bookings') }}
         />
       )}
+
+      {lightbox && (() => {
+        const cur = lightbox.slides[lightbox.index]
+        const total = lightbox.slides.length
+        const goPrev = (e: React.MouseEvent) => { e.stopPropagation(); setLightbox(lb => lb && { ...lb, index: (lb.index - 1 + total) % total }) }
+        const goNext = (e: React.MouseEvent) => { e.stopPropagation(); setLightbox(lb => lb && { ...lb, index: (lb.index + 1) % total }) }
+        return (
+          <div
+            className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
+            onClick={() => setLightbox(null)}
+          >
+            <button onClick={e => { e.stopPropagation(); setLightbox(null) }}
+              className="absolute top-5 right-5 w-10 h-10 bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors">
+              <svg viewBox="0 0 24 24" className="w-5 h-5 fill-none stroke-white" strokeWidth="2" strokeLinecap="round">
+                <path d="M18 6 6 18M6 6l12 12"/>
+              </svg>
+            </button>
+
+            {total > 1 && (
+              <button onClick={goPrev}
+                className="absolute left-5 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors">
+                <svg viewBox="0 0 20 20" className="w-5 h-5 fill-white"><path fillRule="evenodd" d="M12.707 5.293a1 1 0 0 1 0 1.414L9.414 10l3.293 3.293a1 1 0 0 1-1.414 1.414l-4-4a1 1 0 0 1 0-1.414l4-4a1 1 0 0 1 1.414 0z" clipRule="evenodd"/></svg>
+              </button>
+            )}
+
+            <img
+              src={cur.url}
+              alt={cur.label}
+              onClick={e => e.stopPropagation()}
+              className="max-w-[90vw] max-h-[90vh] object-contain"
+            />
+
+            {total > 1 && (
+              <button onClick={goNext}
+                className="absolute right-5 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors">
+                <svg viewBox="0 0 20 20" className="w-5 h-5 fill-white"><path fillRule="evenodd" d="M7.293 14.707a1 1 0 0 1 0-1.414L10.586 10 7.293 6.707a1 1 0 0 1 1.414-1.414l4 4a1 1 0 0 1 0 1.414l-4 4a1 1 0 0 1-1.414 0z" clipRule="evenodd"/></svg>
+              </button>
+            )}
+
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
+              <span className="text-white/60 text-xs tracking-widest uppercase">{cur.label}</span>
+              {total > 1 && (
+                <div className="flex gap-1.5">
+                  {lightbox.slides.map((_, i) => (
+                    <button key={i} onClick={e => { e.stopPropagation(); setLightbox(lb => lb && { ...lb, index: i }) }}
+                      className={`w-1.5 h-1.5 rounded-full transition-all ${i === lightbox.index ? 'bg-white w-4' : 'bg-white/40'}`} />
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )
+      })()}
     </div>
   )
 }
