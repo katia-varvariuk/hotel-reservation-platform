@@ -4,15 +4,9 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import api from '@/lib/api'
 import { Reservation } from '@/lib/types'
+import { STATUS_LABELS } from '@/lib/constants'
 import { useAuth } from '@/context/AuthContext'
-
-const STATUS_LABELS: Record<string, string> = {
-  Pending: 'Очікує',
-  Confirmed: 'Підтверджено',
-  CheckedIn: 'Заселено',
-  CheckedOut: 'Виселено',
-  Cancelled: 'Скасовано',
-}
+import { useToast } from '@/context/ToastContext'
 
 const STATUS_STYLES: Record<string, string> = {
   Pending: 'bg-gold/10 text-gold-dark border border-gold/40',

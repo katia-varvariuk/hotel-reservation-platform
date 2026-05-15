@@ -3,20 +3,13 @@
 import { useState, useEffect } from 'react'
 import api from '@/lib/api'
 import { Statistics } from '@/lib/types'
+import { STATUS_LABELS as STATUS_UA, STATUS_DOT, ROOM_TYPE_UA } from '@/lib/constants'
+import { useToast } from '@/context/ToastContext'
 
-const STATUS_UA: Record<string, string> = {
-  Pending: 'Очікує', Confirmed: 'Підтверджено', CheckedIn: 'Заселено',
-  CheckedOut: 'Виселено', Cancelled: 'Скасовано',
-}
 const STATUS_COLORS: Record<string, string> = {
   Pending: 'bg-amber-400', Confirmed: 'bg-gold', CheckedIn: 'bg-emerald-500',
   CheckedOut: 'bg-slate-400', Cancelled: 'bg-red-400',
 }
-const STATUS_DOT: Record<string, string> = {
-  Pending: 'bg-amber-400', Confirmed: 'bg-gold', CheckedIn: 'bg-emerald-500',
-  CheckedOut: 'bg-slate-300', Cancelled: 'bg-red-400',
-}
-const ROOM_TYPE_UA: Record<string, string> = { Standard: 'Стандарт', Deluxe: 'Делюкс', Suite: 'Сюїт' }
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState<Statistics | null>(null)
@@ -43,14 +36,38 @@ export default function AdminDashboard() {
   if (!stats) return null
 
   const cards = [
-    { label: 'Всього номерів',        value: stats.totalRooms,              icon: '🛏',  accent: 'text-gold-dark',    bg: 'bg-cream' },
-    { label: 'Доступно сьогодні',     value: stats.availableRoomsToday,     icon: '✅',  accent: 'text-emerald-600',  bg: 'bg-sage/10' },
-    { label: 'Заповненість',          value: `${stats.occupancyRateToday.toFixed(1)}%`, icon: '📊', accent: 'text-purple-600', bg: 'bg-purple-50' },
-    { label: 'Активні бронювання',    value: stats.activeReservations,      icon: '🔥',  accent: 'text-orange-600',   bg: 'bg-orange-50' },
-    { label: 'Дохід цього місяця',    value: `$${stats.revenueThisMonth.toFixed(0)}`, icon: '💰', accent: 'text-emerald-600', bg: 'bg-sage/10' },
-    { label: 'Загальний дохід',       value: `$${stats.totalRevenue.toFixed(0)}`,     icon: '💵', accent: 'text-gold-dark',    bg: 'bg-cream' },
-    { label: 'Всього бронювань',      value: stats.totalReservations,       icon: '📋',  accent: 'text-brown-mid',    bg: 'bg-cream' },
-    { label: 'Нових клієнтів (міс.)', value: stats.newClientsThisMonth,     icon: '👥',  accent: 'text-purple-600',   bg: 'bg-purple-50' },
+    {
+      label: 'Всього номерів', value: stats.totalRooms, accent: 'text-gold-dark', iconColor: 'stroke-gold-dark',
+      icon: <><path d="M3 7h18M3 7a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2M3 7V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2M8 16v-2a2 2 0 0 1 4 0v2"/></>,
+    },
+    {
+      label: 'Доступно сьогодні', value: stats.availableRoomsToday, accent: 'text-emerald-600', iconColor: 'stroke-emerald-600',
+      icon: <><path d="M20 6 9 17l-5-5"/></>,
+    },
+    {
+      label: 'Заповненість', value: `${stats.occupancyRateToday.toFixed(1)}%`, accent: 'text-purple-600', iconColor: 'stroke-purple-600',
+      icon: <><rect x="2" y="12" width="4" height="9" rx="1"/><rect x="9" y="7" width="4" height="14" rx="1"/><rect x="16" y="3" width="4" height="18" rx="1"/></>,
+    },
+    {
+      label: 'Активні бронювання', value: stats.activeReservations, accent: 'text-orange-600', iconColor: 'stroke-orange-600',
+      icon: <><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></>,
+    },
+    {
+      label: 'Дохід цього місяця', value: `$${stats.revenueThisMonth.toFixed(0)}`, accent: 'text-emerald-600', iconColor: 'stroke-emerald-600',
+      icon: <><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5a2.5 2.5 0 0 1 5 0c0 1.5-1 2-2.5 2.5S9.5 13 9.5 14.5a2.5 2.5 0 0 0 5 0"/></>,
+    },
+    {
+      label: 'Загальний дохід', value: `$${stats.totalRevenue.toFixed(0)}`, accent: 'text-gold-dark', iconColor: 'stroke-gold-dark',
+      icon: <><path d="M3 17 9 11l4 4 8-8M17 9h4v4"/></>,
+    },
+    {
+      label: 'Всього бронювань', value: stats.totalReservations, accent: 'text-brown-mid', iconColor: 'stroke-brown-mid',
+      icon: <><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></>,
+    },
+    {
+      label: 'Нових клієнтів (міс.)', value: stats.newClientsThisMonth, accent: 'text-purple-600', iconColor: 'stroke-purple-600',
+      icon: <><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></>,
+    },
   ]
 
   const maxRevenue = Math.max(...(stats.monthlyRevenue?.map(m => Number(m.revenue)) ?? [1]), 1)
@@ -63,8 +80,10 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {cards.map(card => (
           <div key={card.label} className="bg-ivory rounded-2xl border border-beige-light shadow-sm p-4">
-            <div className={`inline-flex items-center justify-center w-9 h-9 rounded-xl text-lg mb-3 ${card.bg}`}>
-              {card.icon}
+            <div className="mb-3">
+              <svg viewBox="0 0 24 24" className={`w-5 h-5 fill-none ${card.iconColor}`} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                {card.icon}
+              </svg>
             </div>
             <div className={`text-2xl font-bold mb-0.5 ${card.accent}`}>{card.value}</div>
             <div className="text-xs text-brown-light">{card.label}</div>

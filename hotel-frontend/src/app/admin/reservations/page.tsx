@@ -3,26 +3,12 @@
 import { useState, useEffect, useMemo } from 'react'
 import api from '@/lib/api'
 import { Reservation } from '@/lib/types'
-
-const TIER_LABELS: Record<string, { label: string; color: string }> = {
-  new:     { label: 'Новий',     color: 'bg-slate-100 text-slate-600' },
-  regular: { label: 'Постійний', color: 'bg-blue-100 text-blue-700' },
-  vip:     { label: 'VIP',       color: 'bg-amber-100 text-amber-700' },
-}
+import { TIER_LABELS, STATUS_LABELS, STATUS_COLORS } from '@/lib/constants'
+import { useToast } from '@/context/ToastContext'
 
 function TierBadge({ tier }: { tier: string | null }) {
   const t = TIER_LABELS[tier ?? 'new'] ?? TIER_LABELS.new
   return <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${t.color}`}>{t.label}</span>
-}
-
-const STATUS_LABELS: Record<string, string> = {
-  Pending: 'Очікує', Confirmed: 'Підтверджено', CheckedIn: 'Заселено',
-  CheckedOut: 'Виселено', Cancelled: 'Скасовано',
-}
-const STATUS_COLORS: Record<string, string> = {
-  Pending: 'bg-gold/10 text-gold-dark', Confirmed: 'bg-cream text-gold-dark',
-  CheckedIn: 'bg-sage/10 text-sage', CheckedOut: 'bg-beige-light text-brown-mid',
-  Cancelled: 'bg-red-50 text-red-600',
 }
 const ALL_STATUSES = ['Pending', 'Confirmed', 'CheckedIn', 'CheckedOut', 'Cancelled']
 

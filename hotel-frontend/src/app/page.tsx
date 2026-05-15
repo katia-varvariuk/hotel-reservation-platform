@@ -4,13 +4,14 @@ import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import api from '@/lib/api'
 import { AvailableRoom, ReviewDto } from '@/lib/types'
+import { ROOM_TYPE_UA } from '@/lib/constants'
 import { useAuth } from '@/context/AuthContext'
+import { useToast } from '@/context/ToastContext'
 import BookingModal from '@/components/BookingModal'
 
-const today = () => new Date().toISOString().split('T')[0]
-const tomorrow = () => { const d = new Date(); d.setDate(d.getDate() + 1); return d.toISOString().split('T')[0] }
-
-const ROOM_TYPE_UA: Record<string, string> = { Standard: 'Стандарт', Deluxe: 'Делюкс', Suite: 'Сюїт' }
+const localDate = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+const today = () => localDate(new Date())
+const tomorrow = () => { const d = new Date(); d.setDate(d.getDate() + 1); return localDate(d) }
 
 const AMENITIES = [
   {
@@ -47,6 +48,7 @@ const TESTIMONIALS_FALLBACK = [
 
 export default function HomePage() {
   const { isLoading, isClient, isAdmin, user } = useAuth()
+  const { showToast } = useToast()
   const [rooms, setRooms] = useState<AvailableRoom[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -72,7 +74,7 @@ export default function HomePage() {
     setReviews(rs => rs.filter(r => r.reviewId !== id))
   }
 
-  const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(''), 5000) }
+  const showLocalToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(''), 5000) }
 
   const search = useCallback(async (scroll = false) => {
     setLoading(true); setError('')
@@ -83,7 +85,7 @@ export default function HomePage() {
       const res = await api.get<AvailableRoom[]>('/api/rooms/available', { params })
       setRooms(res.data)
       if (scroll) setTimeout(() => document.getElementById('rooms')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50)
-    } catch { setError('Не вдалося завантажити номери') }
+    } catch { setError('Не вдалося завантажити номери'); showToast('Не вдалося завантажити номери', 'error') }
     finally { setLoading(false) }
   }, [checkIn, checkOut, roomType, minCapacity])
 
@@ -111,12 +113,6 @@ export default function HomePage() {
       <section className="-mt-20 relative h-screen flex flex-col justify-end">
         {/* Background */}
         <div className="absolute inset-0 bg-gradient-to-br from-brown via-brown-mid to-graphite">
-          <img
-            src="https://images.unsplash.com/photo-1566073771259-9cc1f9cda539?w=1920&q=80&auto=format&fit=crop"
-            alt="Luxury hotel"
-            className="w-full h-full object-cover opacity-60"
-            onError={e => (e.currentTarget.style.display = 'none')}
-          />
           <div className="absolute inset-0 bg-gradient-to-t from-graphite/80 via-brown/30 to-transparent" />
         </div>
 
@@ -362,7 +358,7 @@ export default function HomePage() {
       {selected && (
         <BookingModal room={selected} checkIn={checkIn} checkOut={checkOut}
           onClose={() => setSelected(null)}
-          onSuccess={() => { setSelected(null); search(); showToast('Бронювання прийнято! Очікуйте підтвердження від адміністратора.') }} />
+          onSuccess={() => { setSelected(null); search(); showLocalToast('Бронювання прийнято! Очікуйте підтвердження від адміністратора.'); showToast('Бронювання прийнято!', 'success') }} />
       )}
 
       {/* Toast */}

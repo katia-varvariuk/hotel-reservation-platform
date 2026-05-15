@@ -4,9 +4,9 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import api from '@/lib/api'
 import { AvailableRoom } from '@/lib/types'
+import { ROOM_TYPE_UA } from '@/lib/constants'
 import { useAuth } from '@/context/AuthContext'
-
-const ROOM_TYPE_UA: Record<string, string> = { Standard: 'Стандарт', Deluxe: 'Делюкс', Suite: 'Сюїт' }
+import { useToast } from '@/context/ToastContext'
 
 export default function FavoritesPage() {
   const { user } = useAuth()
