@@ -10,6 +10,7 @@ import { useToast } from '@/context/ToastContext'
 
 export default function FavoritesPage() {
   const { user } = useAuth()
+  const { showToast } = useToast()
   const [rooms, setRooms] = useState<AvailableRoom[]>([])
   const [loading, setLoading] = useState(true)
   const [removing, setRemoving] = useState<number | null>(null)
@@ -25,6 +26,8 @@ export default function FavoritesPage() {
     ]).then(([favRes, roomsRes]) => {
       const favIds = new Set(favRes.data)
       setRooms(roomsRes.data.filter(r => favIds.has(r.roomId)))
+    }).catch(() => {
+      showToast('Не вдалося завантажити улюблені номери', 'error')
     }).finally(() => setLoading(false))
   }, [user])
 

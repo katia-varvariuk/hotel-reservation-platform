@@ -110,9 +110,9 @@ export default function BookingsPage() {
               <div key={r.reservationId} className="bg-ivory border border-beige hover:border-brown-light transition-colors group">
                 <div className="p-6 flex items-center gap-6">
                   {/* ID + status */}
-                  <div className="shrink-0 text-center w-16">
+                  <div className="shrink-0 text-center">
                     <p className="text-[10px] tracking-[0.3em] uppercase text-brown-light mb-1">#{r.reservationId}</p>
-                    <span className={`text-[10px] tracking-[0.15em] uppercase px-2 py-1 font-medium ${STATUS_STYLES[r.status] ?? 'bg-beige text-brown-mid'}`}>
+                    <span className={`text-[10px] tracking-tight uppercase px-2 py-1 font-medium whitespace-nowrap ${STATUS_STYLES[r.status] ?? 'bg-beige text-brown-mid'}`}>
                       {STATUS_LABELS[r.status] ?? r.status}
                     </span>
                   </div>
