@@ -9,11 +9,11 @@ import { useAuth } from '@/context/AuthContext'
 import { useToast } from '@/context/ToastContext'
 
 const STATUS_STYLES: Record<string, string> = {
-  Pending: 'bg-gold/10 text-gold-dark border border-gold/40',
-  Confirmed: 'bg-sage/10 text-sage border border-sage/40',
+  Pending: 'bg-amber-50 text-amber-700 border border-amber-200',
+  Confirmed: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
   CheckedIn: 'bg-brown/10 text-brown border border-brown/20',
-  CheckedOut: 'bg-beige text-brown-light border border-beige',
-  Cancelled: 'bg-red-50 text-red-600 border border-red-200',
+  CheckedOut: 'bg-beige text-brown-mid border border-beige',
+  Cancelled: 'bg-red-50 text-red-700 border border-red-200',
 }
 
 const STATUS_FILTERS = ['all', 'Pending', 'Confirmed', 'CheckedIn', 'CheckedOut', 'Cancelled']
@@ -69,9 +69,9 @@ export default function BookingsPage() {
           <div className="flex gap-1 flex-wrap mb-8 border-b border-beige pb-0">
             {STATUS_FILTERS.map(s => (
               <button key={s} onClick={() => setStatusFilter(s)}
-                className={`px-5 py-3 text-xs tracking-[0.25em] uppercase transition-all border-b-2 -mb-px ${
+                className={`px-5 py-3 text-xs tracking-[0.25em] uppercase transition-all border-b-[3px] -mb-px ${
                   statusFilter === s
-                    ? 'border-gold text-brown font-medium'
+                    ? 'border-gold text-brown font-semibold'
                     : 'border-transparent text-brown-light hover:text-brown'
                 }`}>
                 {s === 'all' ? `Усі (${reservations.length})` : `${STATUS_LABELS[s]} (${reservations.filter(r => r.status === s).length})`}
@@ -145,7 +145,7 @@ export default function BookingsPage() {
                   {(r.status === 'Pending' || r.status === 'Confirmed') && (
                     <div className="shrink-0 pl-4 border-l border-beige">
                       <button onClick={() => cancel(r.reservationId)} disabled={cancelling === r.reservationId}
-                        className="text-xs text-brown-light hover:text-red-500 tracking-wide transition-colors disabled:opacity-40">
+                        className="text-xs text-brown-light hover:text-red-500 tracking-wide transition-all disabled:opacity-40 underline underline-offset-2 decoration-transparent hover:decoration-red-400">
                         {cancelling === r.reservationId ? '...' : 'Скасувати'}
                       </button>
                     </div>

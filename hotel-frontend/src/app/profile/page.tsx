@@ -18,7 +18,7 @@ interface ClientProfile {
 }
 
 export default function ProfilePage() {
-  const { user } = useAuth()
+  const { user, updateProfile } = useAuth()
   const { showToast } = useToast()
   const [profile, setProfile] = useState<ClientProfile | null>(null)
   const [loading, setLoading] = useState(true)
@@ -76,6 +76,7 @@ export default function ProfilePage() {
           setPhone(res.data.phone ?? '')
           setAvatarUrl(res.data.avatarUrl ?? '')
           setProfile({ clientId: 0, fullName: res.data.fullName, passportData: null, phone: res.data.phone, email: user.email, avatarUrl: res.data.avatarUrl })
+          updateProfile(res.data.fullName ?? '', res.data.avatarUrl ?? undefined)
         })
         .catch(() => setError('Не вдалося завантажити профіль'))
         .finally(() => setLoading(false))
@@ -88,6 +89,7 @@ export default function ProfilePage() {
         setFullName(res.data.fullName)
         setPhone(res.data.phone ?? '')
         setAvatarUrl(res.data.avatarUrl ?? '')
+        updateProfile(res.data.fullName, res.data.avatarUrl ?? undefined)
       })
       .catch(() => setError('Не вдалося завантажити профіль'))
       .finally(() => setLoading(false))
@@ -108,6 +110,7 @@ export default function ProfilePage() {
       }
       setSuccess('Профіль оновлено')
       setProfile(p => p ? { ...p, fullName, phone } : p)
+      updateProfile(fullName, avatarUrl || undefined)
       showToast('Профіль оновлено', 'success')
     } catch { setError('Не вдалося зберегти зміни'); showToast('Не вдалося зберегти зміни', 'error') }
     finally { setSaving(false) }
@@ -124,6 +127,7 @@ export default function ProfilePage() {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
       setAvatarUrl(res.data.avatarUrl)
+      updateProfile(fullName, res.data.avatarUrl)
     } catch { setError('Не вдалося завантажити аватар') }
     finally { setAvatarUploading(false) }
   }
@@ -147,13 +151,14 @@ export default function ProfilePage() {
     } finally { setChangingPw(false) }
   }
 
-  const initials = user?.email ? user.email[0].toUpperCase() : '?'
-  const displayName = user?.email ? user.email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : ''
+  const headerName = fullName || (user?.email
+    ? user.email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+    : 'Профіль')
 
-  const inputCls = "w-full bg-white border border-stone-200 rounded-xl px-4 py-3.5 text-sm text-brown focus:outline-none focus:border-gold/60 focus:ring-2 focus:ring-gold/10 transition-all"
-  const inputDisabledCls = "w-full bg-stone-50 border border-stone-100 rounded-xl px-4 py-3.5 text-sm text-brown-light cursor-not-allowed"
+  const inputCls = "w-full bg-white border border-stone-200 rounded-xl pl-10 pr-4 py-3.5 text-sm text-brown focus:outline-none focus:border-gold/60 focus:ring-2 focus:ring-gold/10 transition-all"
+  const inputDisabledCls = "w-full bg-stone-50 border border-stone-100 rounded-xl pl-10 pr-4 py-3.5 text-sm text-brown-light cursor-not-allowed"
   const labelCls = "block text-xs font-medium text-brown-light mb-1.5"
-  const btnCls = "inline-flex items-center gap-2 bg-brown text-ivory px-6 py-3 rounded-xl text-sm font-medium hover:bg-gold transition-colors duration-300 disabled:opacity-50 shadow-sm"
+  const btnCls = "w-full flex items-center justify-center gap-2 bg-brown text-ivory px-6 py-3.5 rounded-xl text-sm font-medium hover:bg-gold hover:shadow-md transition-all duration-300 disabled:opacity-50 shadow-sm"
 
   const AvatarPlaceholder = () => (
     <svg viewBox="0 0 24 24" className="w-12 h-12 stroke-gold/40 fill-none" strokeWidth="1" strokeLinecap="round">
@@ -173,7 +178,7 @@ export default function ProfilePage() {
           </div>
           <div>
             <p className="text-gold text-[10px] tracking-[0.5em] uppercase mb-1">Особистий кабінет</p>
-            <h1 className="font-serif text-4xl text-white">{displayName || 'Профіль'}</h1>
+            <h1 className="font-serif text-4xl text-white">{headerName}</h1>
           </div>
         </div>
       </div>
@@ -216,17 +221,35 @@ export default function ProfilePage() {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Full name */}
                     <div>
                       <label className={labelCls}>Повне ім&apos;я</label>
-                      <input value={fullName} onChange={e => setFullName(e.target.value)} required className={inputCls} />
+                      <div className="relative">
+                        <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 stroke-stone-300 fill-none pointer-events-none" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                          <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+                        </svg>
+                        <input value={fullName} onChange={e => setFullName(e.target.value)} required className={inputCls} />
+                      </div>
                     </div>
+                    {/* Email */}
                     <div>
                       <label className={labelCls}>Email</label>
-                      <input value={profile?.email ?? ''} disabled className={inputDisabledCls} />
+                      <div className="relative">
+                        <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 stroke-stone-300 fill-none pointer-events-none" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                          <rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/>
+                        </svg>
+                        <input value={profile?.email ?? ''} disabled className={inputDisabledCls} />
+                      </div>
                     </div>
+                    {/* Phone */}
                     <div>
                       <label className={labelCls}>Телефон</label>
-                      <input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+380..." className={inputCls} />
+                      <div className="relative">
+                        <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 stroke-stone-300 fill-none pointer-events-none" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.28 2 2 0 0 1 3.59 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.56a16 16 0 0 0 5.53 5.53l.96-.96a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21 16.92z"/>
+                        </svg>
+                        <input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+380..." className={inputCls} />
+                      </div>
                     </div>
                   </div>
 
@@ -263,15 +286,15 @@ export default function ProfilePage() {
                   {pwSuccess && <div className="bg-emerald-50 border border-emerald-100 text-emerald-700 text-sm px-4 py-3 rounded-xl mb-5">{pwSuccess}</div>}
                   <form onSubmit={async e => { await changePassword(e); if (!pwError) setPwOpen(false) }} className="space-y-5">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <PwField label="Поточний пароль" value={currentPassword} onChange={setCurrentPassword} show={showCurrent} toggle={() => setShowCurrent(v => !v)} cls={inputCls} />
-                      <PwField label="Новий пароль" value={newPassword} onChange={setNewPassword} show={showNew} toggle={() => setShowNew(v => !v)} cls={inputCls} />
+                      <PwField label="Поточний пароль" value={currentPassword} onChange={setCurrentPassword} show={showCurrent} toggle={() => setShowCurrent(v => !v)} cls="w-full bg-white border border-stone-200 rounded-xl px-4 py-3.5 text-sm text-brown focus:outline-none focus:border-gold/60 focus:ring-2 focus:ring-gold/10 transition-all" />
+                      <PwField label="Новий пароль" value={newPassword} onChange={setNewPassword} show={showNew} toggle={() => setShowNew(v => !v)} cls="w-full bg-white border border-stone-200 rounded-xl px-4 py-3.5 text-sm text-brown focus:outline-none focus:border-gold/60 focus:ring-2 focus:ring-gold/10 transition-all" />
                       <div>
                         <label className={labelCls}>Підтвердити пароль</label>
-                        <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required className={inputCls} />
+                        <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required className="w-full bg-white border border-stone-200 rounded-xl px-4 py-3.5 text-sm text-brown focus:outline-none focus:border-gold/60 focus:ring-2 focus:ring-gold/10 transition-all" />
                       </div>
                     </div>
                     <div className="flex gap-3">
-                      <button type="submit" disabled={changingPw} className={btnCls}>
+                      <button type="submit" disabled={changingPw} className="inline-flex items-center justify-center gap-2 bg-brown text-ivory px-6 py-3 rounded-xl text-sm font-medium hover:bg-gold hover:shadow-md transition-all duration-300 disabled:opacity-50 shadow-sm">
                         {changingPw ? 'Збереження...' : 'Змінити пароль'}
                       </button>
                       <button type="button" onClick={() => { setPwOpen(false); setPwError(''); setCurrentPassword(''); setNewPassword(''); setConfirmPassword('') }}

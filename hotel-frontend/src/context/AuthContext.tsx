@@ -8,6 +8,8 @@ interface AuthUser {
   email: string
   role: UserRole
   clientId: number | null
+  fullName?: string
+  avatarUrl?: string
 }
 
 interface AuthContextValue {
@@ -15,6 +17,7 @@ interface AuthContextValue {
   token: string | null
   login: (token: string, user: AuthUser) => void
   logout: () => void
+  updateProfile: (fullName: string, avatarUrl?: string) => void
   isAdmin: boolean
   isClient: boolean
   isLoading: boolean
@@ -54,10 +57,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null)
   }
 
+  const updateProfile = (newFullName: string, newAvatarUrl?: string) => {
+    if (!user) return
+    const updated: AuthUser = {
+      ...user,
+      fullName: newFullName,
+      ...(newAvatarUrl !== undefined && { avatarUrl: newAvatarUrl }),
+    }
+    localStorage.setItem('user', JSON.stringify(updated))
+    setUser(updated)
+  }
+
   return (
     <AuthContext.Provider value={{
       user, token,
-      login, logout,
+      login, logout, updateProfile,
       isAdmin: user?.role === 'Admin',
       isClient: user?.role === 'Client',
       isLoading,

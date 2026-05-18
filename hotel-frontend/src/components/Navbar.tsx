@@ -23,13 +23,17 @@ export default function Navbar() {
   const isHome = pathname === '/'
   const transparent = isHome && !scrolled
 
+  const displayName = user
+    ? (user.fullName || user.email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, c => c.toUpperCase()))
+    : ''
+
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
       transparent
         ? 'bg-transparent'
         : 'bg-warm-white/95 backdrop-blur-md border-b border-beige/40 shadow-sm'
     }`}>
-      <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-8 h-20 flex items-center justify-between">
 
         {/* Logo */}
         <Link href="/" className="flex flex-col leading-none gap-0.5 shrink-0">
@@ -55,14 +59,16 @@ export default function Navbar() {
           {user ? (
             <div className={`flex items-center gap-4 pl-6 border-l transition-colors ${transparent ? 'border-white/20' : 'border-beige'}`}>
               <div className="hidden sm:flex items-center gap-3">
-                <div className={`w-8 h-8 flex items-center justify-center text-xs font-semibold tracking-wide shrink-0 ${
+                <div className={`w-8 h-8 rounded-full overflow-hidden flex items-center justify-center text-xs font-semibold tracking-wide shrink-0 ${
                   isAdmin ? 'bg-gold text-ivory' : transparent ? 'bg-white/20 text-white' : 'bg-brown text-ivory'
                 }`}>
-                  {user.email[0].toUpperCase()}
+                  {user.avatarUrl
+                    ? <img src={user.avatarUrl} alt="" className="w-full h-full object-cover" onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none' }} />
+                    : user.email[0].toUpperCase()}
                 </div>
                 <div className="text-left">
                   <p className={`text-xs font-medium leading-none mb-0.5 transition-colors ${transparent ? 'text-white' : 'text-brown'}`}>
-                    {user.email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                    {displayName}
                   </p>
                   <span className={`text-[10px] tracking-[0.2em] uppercase ${isAdmin ? 'text-gold' : transparent ? 'text-gold-light' : 'text-gold'}`}>
                     {isAdmin ? 'Адміністратор' : 'Клієнт'}
