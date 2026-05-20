@@ -33,7 +33,13 @@ namespace HotelReservation.Bll.Services
                 return null;
             }
 
-            return _mapper.Map<ClientDto>(client);
+            var dto = _mapper.Map<ClientDto>(client);
+            var staysTask = _unitOfWork.Reservations.CountCompletedStaysAsync(id, cancellationToken);
+            var reviewsTask = _unitOfWork.Reviews.CountByClientAsync(id, cancellationToken);
+            await Task.WhenAll(staysTask, reviewsTask);
+            dto.CompletedStays = staysTask.Result;
+            dto.ReviewsCount = reviewsTask.Result;
+            return dto;
         }
 
         public async Task<IEnumerable<ClientDto>> GetAllAsync(CancellationToken cancellationToken = default)

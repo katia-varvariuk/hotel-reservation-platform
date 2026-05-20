@@ -105,5 +105,12 @@ namespace HotelReservation.Dal.Repositories
             var result = await conn.QuerySingleAsync(sql, new { RoomId = roomId });
             return ((double)result.average, (int)result.count);
         }
+
+        public async Task<int> CountByClientAsync(int clientId, CancellationToken cancellationToken = default)
+        {
+            const string sql = "SELECT COUNT(*) FROM reviews WHERE clientid = @ClientId";
+            await using var conn = new NpgsqlConnection(_connectionString);
+            return await conn.ExecuteScalarAsync<int>(sql, new { ClientId = clientId });
+        }
     }
 }

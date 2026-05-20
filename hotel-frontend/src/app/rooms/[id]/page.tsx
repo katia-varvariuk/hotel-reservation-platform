@@ -193,7 +193,7 @@ export default function RoomDetailPage() {
         setReviews(rs => rs.map(r => r.reviewId === myReview.reviewId ? { ...r, rating, comment } : r))
       } else {
         const res = await api.post<ReviewDto>('/api/review', { roomId: parseInt(id), rating, comment })
-        const newReview = { ...res.data, clientName: user?.email ?? '', avatarUrl: null }
+        const newReview = { ...res.data, clientName: user?.fullName ?? user?.email ?? '', avatarUrl: user?.avatarUrl ?? null }
         setMyReview(newReview)
         setReviews(rs => [newReview, ...rs])
       }

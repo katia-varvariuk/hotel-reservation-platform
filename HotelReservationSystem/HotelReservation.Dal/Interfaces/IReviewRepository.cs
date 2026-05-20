@@ -12,5 +12,6 @@ namespace HotelReservation.Dal.Interfaces
         Task<IEnumerable<Review>> GetAllAsync(CancellationToken cancellationToken = default);
         Task<bool> DeleteAsync(int reviewId, CancellationToken cancellationToken = default);
         Task<(double Average, int Count)> GetRatingStatsAsync(int roomId, CancellationToken cancellationToken = default);
+        Task<int> CountByClientAsync(int clientId, CancellationToken cancellationToken = default);
     }
 }

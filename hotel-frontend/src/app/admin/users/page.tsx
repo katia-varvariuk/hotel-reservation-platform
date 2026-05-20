@@ -3,15 +3,10 @@
 import { useState, useEffect, useMemo } from 'react'
 import api from '@/lib/api'
 import { UserAdminDto } from '@/lib/types'
-
-const TIERS: { value: string; label: string; color: string }[] = [
-  { value: 'new',     label: 'Новий',     color: 'bg-slate-100 text-slate-600' },
-  { value: 'regular', label: 'Постійний', color: 'bg-blue-100 text-blue-700' },
-  { value: 'vip',     label: 'VIP',       color: 'bg-amber-100 text-amber-700' },
-]
+import { TIER_LABELS } from '@/lib/constants'
 
 function TierBadge({ tier }: { tier: string | null }) {
-  const t = TIERS.find(t => t.value === tier) ?? TIERS[0]
+  const t = TIER_LABELS[tier ?? 'new'] ?? TIER_LABELS['new']
   return (
     <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${t.color}`}>{t.label}</span>
   )
@@ -124,7 +119,7 @@ export default function AdminUsersPage() {
                           onChange={e => setTier(u, e.target.value)}
                           className="text-xs border border-beige rounded px-1 py-0.5 text-brown-mid bg-white focus:outline-none focus:border-gold disabled:opacity-50 cursor-pointer"
                         >
-                          {TIERS.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                          {Object.entries(TIER_LABELS).map(([value, { label }]) => <option key={value} value={value}>{label}</option>)}
                         </select>
                       </div>
                     ) : <span className="text-brown-light text-xs">—</span>}

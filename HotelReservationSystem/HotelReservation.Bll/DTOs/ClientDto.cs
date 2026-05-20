@@ -31,6 +31,9 @@ namespace HotelReservation.Bll.DTOs
 
         public DateTime CreatedAt { get; set; }
         public string? AvatarUrl { get; set; }
+        public string LoyaltyTier { get; set; } = "new";
+        public int CompletedStays { get; set; }
+        public int ReviewsCount { get; set; }
     }
 
     public class CreateClientDto
