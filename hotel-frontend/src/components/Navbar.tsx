@@ -58,8 +58,8 @@ export default function Navbar() {
           {/* Auth */}
           {user ? (
             <div className={`flex items-center gap-4 pl-6 border-l transition-colors ${transparent ? 'border-white/20' : 'border-beige'}`}>
-              <div className="hidden sm:flex items-center gap-3">
-                <div className={`w-8 h-8 rounded-full overflow-hidden flex items-center justify-center text-xs font-semibold tracking-wide shrink-0 ${
+              <Link href="/profile" className="hidden sm:flex items-center gap-3 group">
+                <div className={`w-8 h-8 rounded-full overflow-hidden flex items-center justify-center text-xs font-semibold tracking-wide shrink-0 ring-2 ring-transparent group-hover:ring-gold/50 transition-all ${
                   isAdmin ? 'bg-gold text-ivory' : transparent ? 'bg-white/20 text-white' : 'bg-brown text-ivory'
                 }`}>
                   {user.avatarUrl
@@ -67,14 +67,14 @@ export default function Navbar() {
                     : user.email[0].toUpperCase()}
                 </div>
                 <div className="text-left">
-                  <p className={`text-xs font-medium leading-none mb-0.5 transition-colors ${transparent ? 'text-white' : 'text-brown'}`}>
+                  <p className={`text-xs font-medium leading-none mb-0.5 transition-colors group-hover:text-gold ${transparent ? 'text-white' : 'text-brown'}`}>
                     {displayName}
                   </p>
                   <span className={`text-[10px] tracking-[0.2em] uppercase ${isAdmin ? 'text-gold' : transparent ? 'text-gold-light' : 'text-gold'}`}>
                     {isAdmin ? 'Адміністратор' : 'Клієнт'}
                   </span>
                 </div>
-              </div>
+              </Link>
               <button onClick={handleLogout}
                 className={`text-xs tracking-[0.2em] uppercase transition-colors ${transparent ? 'text-white/60 hover:text-white' : 'text-brown-light hover:text-brown'}`}>
                 Вийти
